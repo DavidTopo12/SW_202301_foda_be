@@ -1,7 +1,10 @@
 import express from 'express';
-const router  = express.Router();
+const router = express.Router();
 import empresasRouter from './empresas/empresas';
 import usuariosRouter from './usuarios/usuarios';
+import fodaRouter from './Foda/foda';
+
+import { validateKeyMiddleWare } from './middleware/apiKeyValidator';
 
 //REST API
 //Internet -> HTTP -> REST API -> DB
@@ -18,28 +21,33 @@ import usuariosRouter from './usuarios/usuarios';
 
 //https://localhost:3001
 router.get('/', (_req, res) => {
-  res.json({msg:'Hello World!'});
- });
+  res.json({ msg: 'Hello World!' });
+});
 
 
- //https://localhost:3001/version
- router.get('/version', (_req, res)=>{
+//https://localhost:3001/version
+router.get('/version', (_req, res) => {
   //const no va a ser modificado
-  const version: string="1.0.0";
-  const jsonResp= {"name":"FODA Be", "version":version};
+  const version: string = "1.0.0";
+  const jsonResp = { "name": "FODA Be", "version": version };
   //string, number, boolean, types, interfaces, classses, enumerators 
-  
+
   //para responder
   res.json(jsonResp);
 });
 
+//MIDDLEWARE
+
+
+
 
 //EMPRESAS
-router.use('/empresas', empresasRouter);
+router.use('/empresas', validateKeyMiddleWare, empresasRouter);
 
 // USUARIOS
-router.use('/usuarios', usuariosRouter);
+router.use('/usuarios', validateKeyMiddleWare, usuariosRouter);
 
+router.use('/foda', validateKeyMiddleWare, fodaRouter);
 
 //router.get router.post router.put router.delete router.use
 //
