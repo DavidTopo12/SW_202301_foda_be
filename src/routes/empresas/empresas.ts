@@ -97,6 +97,8 @@ router.put('/upd/:id', async (req, res) => {
       }
     );
 });
+
+
 router.delete('/del/:id',async(req, res)=>{
     const {id} = req.params;
     if(await empresasModel.delete(id)){

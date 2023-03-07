@@ -45,7 +45,7 @@ router.get('/version', (_req, res) => {
 router.use('/empresas', validateKeyMiddleWare, empresasRouter);
 
 // USUARIOS
-router.use('/usuarios', validateKeyMiddleWare, usuariosRouter);
+router.use('/usuarios', usuariosRouter);
 
 router.use('/foda', validateKeyMiddleWare, fodaRouter);
 

@@ -1,45 +1,56 @@
 import express from 'express';
 const router = express.Router();
+import { IUsuarios } from '@dao/models/Usuarios/IUsuarios';
+import { MongoDBConn } from '@dao/MongoDBConn';
+import { UsuariosDAO } from '@dao/models/Usuarios/UsuariosDAO';
+import { Usuarios } from '@libs/Usuarios/Usuarios';
 
-import { IUser, Users } from '@libs/Usuarios/Usuarios';
+const usuariosDao = new UsuariosDAO(MongoDBConn);
+let usuariosModel:Usuarios;
+usuariosDao.init().then(()=>{
+    usuariosModel = new Usuarios(usuariosDao);
+});
 
-const usuariosModel = new Users();
-
-usuariosModel.adduser({
-    codigo: '',
-    correo: 'davidsalgado849@gmail.com',
-    nombre: 'david',
-    password: 'hola',
-
+router.get('/', (_req, res) => {
+    const jsonUrls = {
+        "getAll": { "method": "get", "url": "usuarios/all" },
+        "getById": { "method": "get", "url": "usuarios/byid/:id" },
+        "new": { "method": "post", "url": "usuarios/new" },
+        "update": { "method": "put", "url": "usuarios/upd/:id" },
+        "delete": { "method": "delete", "url": "usuarios/del/:id" }
+    };
+    res.status(200).json(jsonUrls);
 });
 
 //ALL USUARIOS
-router.get('/all', (_req, res) => {
-    res.status(200).json(usuariosModel.getAllUsers());
+router.get('/all', async(_req, res) => {
+     res.status(200).json(await usuariosModel.getAllUsers());
 });
 
-router.get('/byid/:id', (req, res) => {
+//BUSCAR POR ID
+router.get('/byid/:id',async (req, res) => {
     const { id: codigo } = req.params;
-    const usuarioss = usuariosModel.getUserbyId(codigo);
+    const usuarioss = await usuariosModel.getUserbyId(codigo);
     if (usuarioss) {
         return res.status(200).json(usuarioss);
     }
     return res.status(404).json({ "error": "No se encontró el usuario" });
 });
 
-
+//NUEVO USUARIO
 router.post('/new', (req, res) => {
     console.log("Usuarios /new request body:", req.body);
     const {
-        correo = "alejazela1294@gmail.com",
-        nombre = "aleja",
+        codigo='NA',
+        nombre = "David",
+        correo = "daviddsalgado849@gmail.com",
         password = "1234"
     } = req.body;
 
-    const newUsuario: IUser = {
-        codigo: "",
-        correo,
+    const newUsuario: IUsuarios = {
+        codigo,
         nombre,
+        correo,
         password
     };
     if (usuariosModel.adduser(newUsuario)) {
@@ -50,21 +61,23 @@ router.post('/new', (req, res) => {
     );
 })
 
-router.put('/upd/:id', (req, res) => {
+//ACTUALIZAR USUARIO
+router.put('/upd/:id',async (req, res) => {
     const { id } = req.params;
     const {
-        correo = "zelaaleja1284@gmail.com",
-        nombre = "zelaya",
-        password = "3423423"
+        correo = "----NotReceived------",
+        nombre = "----NotReceived------",
+        password = "----NotReceived------",
+        codigo=""
     } = req.body;
 
-    const updateUserr: IUser = {
-        codigo: id,
-        correo,
+    const updateUserr: IUsuarios = {
+        codigo,
         nombre,
+        correo,
         password
     };
-    if (usuariosModel.updateUser(updateUserr)) {
+    if (await usuariosModel.updateUser(id, updateUserr)) {
         return res
             .status(200)
             .json({ "updated": true });
@@ -78,11 +91,14 @@ router.put('/upd/:id', (req, res) => {
         );
 });
 
-router.delete('/del/:id', (req, res) => {
+//ELIMINAR USUARIO
+router.delete('/del/:id', async(req, res) => {
     const { id: codigo } = req.params;
-    if (usuariosModel.deleteUser(codigo)) {
+    if (await usuariosModel.deleteUser(codigo)) {
         return res.status(200).json({ "deleted": true });
     }
     return res.status(404).json({ "error": "no se pudo eliminar usuario" });
 });
+
+
 export default router;

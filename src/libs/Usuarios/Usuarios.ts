@@ -1,65 +1,36 @@
-export interface IUser {
-    codigo: string,
-    correo: string,
-    nombre: string,
-    password: string,
-    roles?: string,
-    created?: Date,
-    lastSession?: Date
-}
+import { IUsuarios } from "@dao/models/Usuarios/IUsuarios";
+import { IDataAccessObject } from "@dao/IDataAccessObject";
+export class Usuarios {
+    //private usuarios: IUsuarios[];
+    private dao: IDataAccessObject;
+    constructor(dao: IDataAccessObject) {
+        this.dao = dao;
+        //this.usuarios = [];
 
-export class Users {
-    private usuarios: IUser[];
-    constructor() {
-        this.usuarios = [];
     }
     getAllUsers() {
-        return this.usuarios;
+        return this.dao.findAll();
     }
     getUserbyId(codigo: string) {
-        const userToReturn = this.usuarios.find((us) => {
-            return us.codigo === codigo;
-        });
-        return userToReturn;
+        return this.dao.findByID(codigo);
     }
-    adduser(newUser: IUser){
+    adduser(newUser: IUsuarios) {
         const date = new Date();
-        const newOne: IUser = {
+        const newOne: IUsuarios = {
             ...newUser,
-            codigo: (Math.random()*1000).toString() + new Date().getTime().toString(),
-            roles: 'Usuario',
             created: date,
             lastSession: date
         }
-        this.usuarios.push(newOne);
-        return true;
+        return this.dao.create(newOne);
     }
 
-    updateUser(updateUsers: IUser){
-        let updatedUser = false;
-        const newUsuario: IUser[] = this.usuarios.map((us) =>{
-            if(us.codigo == updateUsers.codigo){
-                updatedUser =true;
-                return {...us, ...updateUsers, updatedUser: new Date()};
-            }
-            return us;
-        });
-        this.usuarios = newUsuario;
-        return updatedUser;
+    updateUser(codigo: string, updateUsers: IUsuarios) {
+        const updateObject = { ...updateUsers, updated: new Date() };
+        return this.dao.update(codigo, updateObject);
     }
 
-    deleteUser(codigo : string){
-        const UserToDelete = this.usuarios.find((us)=>{
-            return us.codigo === codigo;
-        });
-        if(UserToDelete){
-            const NewUsuarios: IUser[] = this.usuarios.filter((us)=>{
-                return us.codigo !== codigo;
-            });
-            this.usuarios = NewUsuarios;
-            return true;
-        }
-        return false;
+    deleteUser(codigo: string) {
+        return this.dao.delete(codigo);
     }
 
 }
