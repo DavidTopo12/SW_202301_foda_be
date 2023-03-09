@@ -1,5 +1,6 @@
 import { IUsuarios } from "@dao/models/Usuarios/IUsuarios";
 import { IDataAccessObject } from "@dao/IDataAccessObject";
+//import { Security } from "@utils/Security";
 export class Usuarios {
     //private usuarios: IUsuarios[];
     private dao: IDataAccessObject;
@@ -33,4 +34,16 @@ export class Usuarios {
         return this.dao.delete(codigo);
     }
 
+    /*New User del ingeniero
+    public async newUser(email: string, password: string) {
+        try {
+            const newUser = {
+                email,
+                password: Security.encodePassword(password),
+                pswdExpires: new Date(new Date().getTime() + (3 * 30 * 24 * 60 * 60 * 1000))
+            };
+        } catch (ex) {
+
+        }
+    }*/
 }
